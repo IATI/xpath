@@ -2980,6 +2980,22 @@ var xpath = (typeof exports === 'undefined') ? {} : exports;
         }
     };
 
+    function compare(n1, n2) {
+      if (n1.lineNumber < n2.lineNumber) {
+        return -1;
+      }
+
+      if (n1.lineNumber > n2.lineNumber) {
+        return 1;
+      }
+
+      if (n1.columnNumber < n2.columnNumber) {
+        return -1;
+      }
+
+      return 1;
+    }
+
     function nodeOrder(n1, n2) {
         if (n1 === n2) {
             return 0;
@@ -3056,14 +3072,38 @@ var xpath = (typeof exports === 'undefined') ? {} : exports;
         if (n1Par) {
             var cn = n1isAttr ? n1Par.attributes : n1Par.childNodes,
                 len = cn.length;
-            for (var i = 0; i < len; i += 1) {
-                var n = cn[i];
-                if (n === n1) {
-                    return -1;
-                }
-                if (n === n2) {
-                    return 1;
-                }
+
+            var start = 0;
+            var end = len - 1;
+
+            while (start <= end) {
+              var mid = Math.floor(start + (end - start)/2);
+
+              var midNode = cn[mid];
+
+              var fn1 = compare(n1, midNode);
+              var fn2 = compare(n2, midNode);
+
+              if (fn1 == 0) {
+                return -fn2;
+              }
+
+              if (fn2 == 0) {
+                return fn1;
+              }
+
+              if (fn1 < 0 && fn2 < 0) {
+                end = mid - 1;
+              }
+              else if (fn1 > 0  && fn2 > 0) {
+                start = mid + 1;
+              }
+              else if (fn1 < 0) {
+                return -1;
+              }
+              else {
+                return 1;
+              }
             }
         }
 
