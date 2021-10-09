@@ -3251,11 +3251,35 @@ var xpath = (typeof exports === 'undefined') ? {} : exports;
         return p.node;
     };
 
+    XNodeSet.prototype.contains = function(n) {
+      if (this.nodes.length == 0) {
+        return false;
+      }
+
+      var start = 0;
+      var end = this.nodes.length - 1;
+
+      while (start <= end) {
+        var mid = Math.floor(start + (end - start)/2);
+
+        var midNode = this.nodes[mid];
+
+        if (n === midNode) {
+          return true;
+        }
+
+        if (compare(n, midNode) < 0) {
+          end = mid - 1;
+        }
+        else {
+          start = mid + 1;
+        }
+      }
+    };
+
     XNodeSet.prototype.add = function (n) {
-        for (var i = 0; i < this.nodes.length; i += 1) {
-            if (n === this.nodes[i]) {
-                return;
-            }
+        if (this.contains(n)) {
+          return;
         }
 
         this.tree = null;
